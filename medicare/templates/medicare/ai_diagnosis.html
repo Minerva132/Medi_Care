@@ -1,0 +1,492 @@
+{% extends 'medicare/base.html' %}
+
+{% block title %}AI Diagnosis - Medicare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .diagnosis-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 40px;
+        margin-bottom: 30px;
+    }
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .section-header .icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        margin-right: 20px;
+    }
+    
+    .section-header .text h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    
+    .section-header .text p {
+        margin: 5px 0 0 0;
+        color: #64748b;
+        font-size: 14px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 8px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-label .required {
+        color: #ef4444;
+        margin-left: 4px;
+    }
+    
+    .form-label .optional {
+        color: #94a3b8;
+        font-weight: 400;
+        font-size: 12px;
+        margin-left: 8px;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .symptoms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 15px;
+    }
+    
+    .symptom-checkbox {
+        position: relative;
+    }
+    
+    .symptom-checkbox input[type="checkbox"] {
+        display: none;
+    }
+    
+    .symptom-label {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        color: #475569;
+    }
+    
+    .symptom-label:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+    
+    .symptom-checkbox input[type="checkbox"]:checked + .symptom-label {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .symptom-label::before {
+        content: '';
+        width: 20px;
+        height: 20px;
+        border: 2px solid #cbd5e1;
+        border-radius: 6px;
+        margin-right: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .symptom-checkbox input[type="checkbox"]:checked + .symptom-label::before {
+        background: white;
+        border-color: white;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23667eea'%3E%3Cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    }
+    
+    .symptom-counter {
+        background: #fef3c7;
+        border: 2px solid #fbbf24;
+        border-radius: 10px;
+        padding: 12px 20px;
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .symptom-counter.warning {
+        background: #fee2e2;
+        border-color: #ef4444;
+    }
+    
+    .symptom-counter .text {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #92400e;
+    }
+    
+    .symptom-counter.warning .text {
+        color: #991b1b;
+    }
+    
+    .symptom-counter .count {
+        font-size: 24px;
+        font-weight: 700;
+        color: #f59e0b;
+    }
+    
+    .symptom-counter.warning .count {
+        color: #ef4444;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 16px 40px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+    
+    .info-card {
+        background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .info-card h3 {
+        color: #4c1d95;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .info-card ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #5b21b6;
+    }
+    
+    .info-card ul li {
+        margin-bottom: 8px;
+    }
+    
+    .gender-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 8px;
+    }
+    
+    .gender-option {
+        position: relative;
+    }
+    
+    .gender-option input[type="radio"] {
+        display: none;
+    }
+    
+    .gender-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .gender-option label:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+    
+    .gender-option input[type="radio"]:checked + label {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+        color: white;
+    }
+    
+    .gender-option label i {
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+    
+    .gender-option label span {
+        font-weight: 600;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="diagnosis-container">
+    <div class="section-header">
+        <div class="icon">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="text">
+            <h2>AI-Powered Diagnosis</h2>
+            <p>Get instant treatment recommendations based on your symptoms</p>
+        </div>
+    </div>
+    
+    <div class="info-card">
+        <h3><i class="fas fa-info-circle"></i> How it works</h3>
+        <ul>
+            <li>Enter your basic information and select up to 15 symptoms</li>
+            <li>Our AI analyzes your symptoms against our medical database</li>
+            <li>Receive instant treatment recommendations and cost estimates</li>
+            <li>Insurance coverage is calculated automatically if applicable</li>
+        </ul>
+    </div>
+    
+    <form method="POST" action="{% url 'ai_diagnosis_result' %}" id="diagnosisForm">
+        {% csrf_token %}
+        
+        <!-- Personal Information -->
+        <div class="form-card">
+            <h5 class="mb-4" style="color: #1e293b; font-weight: 700;">
+                <i class="fas fa-user text-primary me-2"></i>Personal Information
+            </h5>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Full Name
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" name="full_name" class="form-control" placeholder="Enter your full name" required>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Age
+                            <span class="required">*</span>
+                        </label>
+                        <input type="number" name="age" class="form-control" placeholder="Age" min="1" max="120" required>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Contact Number
+                            <span class="required">*</span>
+                        </label>
+                        <input type="tel" name="contact" class="form-control" placeholder="Phone number" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    Gender
+                    <span class="required">*</span>
+                </label>
+                <div class="gender-options">
+                    <div class="gender-option">
+                        <input type="radio" name="gender" value="Male" id="gender_male" required>
+                        <label for="gender_male">
+                            <i class="fas fa-mars"></i>
+                            <span>Male</span>
+                        </label>
+                    </div>
+                    <div class="gender-option">
+                        <input type="radio" name="gender" value="Female" id="gender_female">
+                        <label for="gender_female">
+                            <i class="fas fa-venus"></i>
+                            <span>Female</span>
+                        </label>
+                    </div>
+                    <div class="gender-option">
+                        <input type="radio" name="gender" value="Other" id="gender_other">
+                        <label for="gender_other">
+                            <i class="fas fa-transgender"></i>
+                            <span>Other</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    Insurance Type
+                    <span class="optional">(Optional)</span>
+                </label>
+                <select name="insurance" class="form-select">
+                    <option value="">Select insurance type</option>
+                    {% for insurance in insurance_types %}
+                    <option value="{{ insurance }}">{{ insurance }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <!-- Symptoms Selection -->
+        <div class="form-card">
+            <h5 class="mb-3" style="color: #1e293b; font-weight: 700;">
+                <i class="fas fa-stethoscope text-primary me-2"></i>Select Your Symptoms
+            </h5>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">
+                Choose up to 15 symptoms you are experiencing
+            </p>
+            
+            <div class="symptoms-grid">
+                {% for symptom in symptoms %}
+                <div class="symptom-checkbox">
+                    <input type="checkbox" name="symptoms" value="{{ symptom }}" id="symptom_{{ forloop.counter }}" class="symptom-input">
+                    <label for="symptom_{{ forloop.counter }}" class="symptom-label">
+                        {{ symptom }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="symptom-counter" id="symptomCounter">
+                <div class="text">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Selected symptoms:</span>
+                </div>
+                <div class="count" id="symptomCount">0 / 15</div>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn-submit" id="submitBtn">
+            <i class="fas fa-magic"></i>
+            Get AI Diagnosis
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const symptomInputs = document.querySelectorAll('.symptom-input');
+    const symptomCount = document.getElementById('symptomCount');
+    const symptomCounter = document.getElementById('symptomCounter');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    function updateSymptomCount() {
+        const checkedCount = document.querySelectorAll('.symptom-input:checked').length;
+        symptomCount.textContent = `${checkedCount} / 15`;
+        
+        if (checkedCount > 15) {
+            symptomCounter.classList.add('warning');
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+        } else {
+            symptomCounter.classList.remove('warning');
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+        }
+    }
+    
+    symptomInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('.symptom-input:checked').length;
+            
+            if (checkedCount > 15 && this.checked) {
+                this.checked = false;
+                alert('You can select maximum 15 symptoms');
+                return;
+            }
+            
+            updateSymptomCount();
+        });
+    });
+    
+    // Form validation
+    document.getElementById('diagnosisForm').addEventListener('submit', function(e) {
+        const checkedCount = document.querySelectorAll('.symptom-input:checked').length;
+        
+        if (checkedCount === 0) {
+            e.preventDefault();
+            alert('Please select at least one symptom');
+            return false;
+        }
+        
+        if (checkedCount > 15) {
+            e.preventDefault();
+            alert('Please select maximum 15 symptoms');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

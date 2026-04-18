@@ -1,0 +1,128 @@
+{%extends 'medicare/base.html'%}
+
+{%block title%}Billing Details - Medicare{%endblock%}
+
+{%block content%}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 fw-bold"><i class="fas fa-file-invoice-dollar text-primary"></i> Billing Details</h1>
+    <div>
+        <a href="{%url 'export_billing_pdf' billing.bill_id%}" class="btn btn-success me-2">
+            <i class="fas fa-file-pdf me-2"></i>Export PDF
+        </a>
+        <a href="{%url 'billing_update' billing.bill_id%}" class="btn btn-warning">
+            <i class="fas fa-edit me-2"></i>Edit
+        </a>
+        <a href="{%url 'billing_list'%}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Bill Information</div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th style="width: 40%;">Bill ID:</th>
+                        <td>{{billing.bill_id}}</td>
+                    </tr>
+                    <tr>
+                        <th>Bill Date:</th>
+                        <td>{{billing.bill_date|date:"F d, Y"}}</td>
+                    </tr>
+                    <tr>
+                        <th>Amount:</th>
+                        <td><strong class="text-success">${{billing.amount|floatformat:2}}</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Payment Method:</th>
+                        <td>{{billing.payment_method}}</td>
+                    </tr>
+                    <tr>
+                        <th>Payment Status:</th>
+                        <td>
+                            {%if billing.payment_status == 'Paid'%}
+                                <span class="badge bg-success">Paid</span>
+                            {%elif billing.payment_status == 'Pending'%}
+                                <span class="badge bg-warning">Pending</span>
+                            {%elif billing.payment_status == 'Failed'%}
+                                <span class="badge bg-danger">Failed</span>
+                            {%else%}
+                                <span class="badge bg-info">{{billing.payment_status}}</span>
+                            {%endif%}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Patient Information</div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th style="width: 40%;">Patient ID:</th>
+                        <td>{{billing.patient.patient_id}}</td>
+                    </tr>
+                    <tr>
+                        <th>Name:</th>
+                        <td><a href="{%url 'patient_detail' billing.patient.patient_id%}">{{billing.patient.full_name}}</a></td>
+                    </tr>
+                    <tr>
+                        <th>Contact:</th>
+                        <td>{{billing.patient.contact_number}}</td>
+                    </tr>
+                    <tr>
+                        <th>Email:</th>
+                        <td>{{billing.patient.email}}</td>
+                    </tr>
+                    <tr>
+                        <th>Insurance:</th>
+                        <td>{{billing.patient.insurance_provider}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Treatment Information</div>
+    <div class="card-body">
+        <table class="table table-borderless">
+            <tr>
+                <th style="width: 20%;">Treatment ID:</th>
+                <td><a href="{%url 'treatment_detail' billing.treatment.treatment_id%}">{{billing.treatment.treatment_id}}</a></td>
+            </tr>
+            <tr>
+                <th>Treatment Type:</th>
+                <td>{{billing.treatment.treatment_type}}</td>
+            </tr>
+            <tr>
+                <th>Description:</th>
+                <td>{{billing.treatment.description|default:"-"}}</td>
+            </tr>
+            <tr>
+                <th>Treatment Date:</th>
+                <td>{{billing.treatment.treatment_date|date:"F d, Y"}}</td>
+            </tr>
+            <tr>
+                <th>Treatment Cost:</th>
+                <td>${{billing.treatment.cost|floatformat:2}}</td>
+            </tr>
+            <tr>
+                <th>Appointment:</th>
+                <td>
+                    <a href="{%url 'appointment_detail' billing.treatment.appointment.appointment_id%}">
+                        {{billing.treatment.appointment}}
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+{%endblock%}

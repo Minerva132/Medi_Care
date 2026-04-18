@@ -1,0 +1,460 @@
+{% extends 'medicare/base.html' %}
+
+{% block title %}Diagnosis Result - Medicare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .result-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .result-header h1 {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .result-header p {
+        font-size: 16px;
+        opacity: 0.9;
+    }
+    
+    .result-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 30px;
+        margin-bottom: 25px;
+    }
+    
+    .card-header-custom {
+        display: flex;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .card-header-custom .icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-right: 15px;
+    }
+    
+    .card-header-custom h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #64748b;
+    }
+    
+    .info-value {
+        color: #1e293b;
+        font-weight: 500;
+    }
+    
+    .symptom-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .symptom-tag {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .diagnosis-box {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-left: 4px solid #f59e0b;
+        padding: 20px;
+        border-radius: 12px;
+        margin: 20px 0;
+    }
+    
+    .diagnosis-box.urgent {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border-left-color: #ef4444;
+    }
+    
+    .diagnosis-box h4 {
+        color: #92400e;
+        font-weight: 700;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .diagnosis-box.urgent h4 {
+        color: #991b1b;
+    }
+    
+    .diagnosis-box p {
+        color: #78350f;
+        margin: 0;
+        line-height: 1.6;
+    }
+    
+    .diagnosis-box.urgent p {
+        color: #7f1d1d;
+    }
+    
+    .medication-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .medication-list li {
+        padding: 12px;
+        background: #f8fafc;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .medication-list li::before {
+        content: '💊';
+        margin-right: 12px;
+        font-size: 20px;
+    }
+    
+    .cost-summary {
+        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+        border-radius: 12px;
+        padding: 25px;
+        margin-top: 20px;
+    }
+    
+    .cost-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        font-size: 15px;
+    }
+    
+    .cost-row.total {
+        border-top: 2px solid #0891b2;
+        margin-top: 10px;
+        padding-top: 15px;
+        font-size: 18px;
+        font-weight: 700;
+    }
+    
+    .cost-label {
+        color: #164e63;
+    }
+    
+    .cost-value {
+        color: #0c4a6e;
+        font-weight: 600;
+    }
+    
+    .insurance-badge {
+        display: inline-block;
+        background: #10b981;
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+    
+    .recommendations-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .recommendations-list li {
+        padding: 15px;
+        background: #f1f5f9;
+        border-left: 4px solid #667eea;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        color: #334155;
+    }
+    
+    .recommendations-list li::before {
+        content: '✓';
+        color: #10b981;
+        font-weight: 700;
+        margin-right: 10px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .btn-action {
+        flex: 1;
+        padding: 14px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .btn-primary-action {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-secondary-action {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+    
+    .btn-secondary-action:hover {
+        background: #f8fafc;
+    }
+    
+    .urgent-banner {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-weight: 600;
+        animation: pulse 2s infinite;
+    }
+    
+    .urgent-banner i {
+        font-size: 32px;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="result-container">
+    {% if result.diagnosis.urgent %}
+    <div class="urgent-banner">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+            <strong>URGENT:</strong> Your symptoms require immediate medical attention. Please visit the nearest emergency room or call emergency services.
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="result-header">
+        <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 15px;"></i>
+        <h1>Diagnosis Complete</h1>
+        <p>AI-powered analysis based on your symptoms</p>
+    </div>
+    
+    <!-- Patient Information -->
+    <div class="result-card">
+        <div class="card-header-custom">
+            <div class="icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <i class="fas fa-user"></i>
+            </div>
+            <h3>Patient Information</h3>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">Full Name:</span>
+            <span class="info-value">{{ result.patient_info.full_name }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Age:</span>
+            <span class="info-value">{{ result.patient_info.age }} years</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Gender:</span>
+            <span class="info-value">{{ result.patient_info.gender }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Contact:</span>
+            <span class="info-value">{{ result.patient_info.contact }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Insurance:</span>
+            <span class="info-value">
+                {{ result.patient_info.insurance }}
+                {% if result.cost_breakdown.coverage_percentage > 0 %}
+                <span class="insurance-badge">{{ result.cost_breakdown.coverage_percentage }}% Coverage</span>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    
+    <!-- Symptoms -->
+    <div class="result-card">
+        <div class="card-header-custom">
+            <div class="icon" style="background: #fbbf24; color: white;">
+                <i class="fas fa-notes-medical"></i>
+            </div>
+            <h3>Reported Symptoms</h3>
+        </div>
+        
+        <div class="symptom-tags">
+            {% for symptom in result.symptoms %}
+            <span class="symptom-tag">{{ symptom }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Diagnosis -->
+    <div class="result-card">
+        <div class="card-header-custom">
+            <div class="icon" style="background: #10b981; color: white;">
+                <i class="fas fa-stethoscope"></i>
+            </div>
+            <h3>AI Diagnosis</h3>
+        </div>
+        
+        <div class="diagnosis-box {% if result.diagnosis.urgent %}urgent{% endif %}">
+            <h4>
+                <i class="fas fa-{% if result.diagnosis.urgent %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                {{ result.diagnosis.treatment }}
+            </h4>
+            <p>{{ result.diagnosis.description }}</p>
+        </div>
+        
+        <h5 style="margin-top: 25px; margin-bottom: 15px; color: #1e293b; font-weight: 700;">
+            <i class="fas fa-pills me-2"></i>Recommended Medications
+        </h5>
+        <ul class="medication-list">
+            {% for medication in result.diagnosis.medications %}
+            <li>{{ medication }}</li>
+            {% endfor %}
+        </ul>
+        
+        <div class="info-row" style="margin-top: 20px; background: #f8fafc; padding: 15px; border-radius: 8px;">
+            <span class="info-label"><i class="fas fa-calendar-check me-2"></i>Follow-up Required:</span>
+            <span class="info-value">{{ result.diagnosis.follow_up }}</span>
+        </div>
+    </div>
+    
+    <!-- Cost Breakdown -->
+    <div class="result-card">
+        <div class="card-header-custom">
+            <div class="icon" style="background: #0891b2; color: white;">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <h3>Cost Breakdown</h3>
+        </div>
+        
+        <div class="cost-summary">
+            <div class="cost-row">
+                <span class="cost-label">Consultation Fee:</span>
+                <span class="cost-value">${{ result.cost_breakdown.consultation_fee|floatformat:2 }}</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">Treatment Cost:</span>
+                <span class="cost-value">${{ result.cost_breakdown.treatment_cost|floatformat:2 }}</span>
+            </div>
+            <div class="cost-row">
+                <span class="cost-label">Lab Tests ({{ result.cost_breakdown.num_tests }} tests):</span>
+                <span class="cost-value">${{ result.cost_breakdown.lab_cost|floatformat:2 }}</span>
+            </div>
+            <div class="cost-row total" style="border-top-color: #0891b2;">
+                <span class="cost-label">Total Cost:</span>
+                <span class="cost-value">${{ result.cost_breakdown.total_cost|floatformat:2 }}</span>
+            </div>
+            
+            {% if result.cost_breakdown.insurance_covered > 0 %}
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 2px dashed #0891b2;">
+                <div class="cost-row" style="color: #10b981;">
+                    <span class="cost-label"><i class="fas fa-shield-alt me-2"></i>Insurance Coverage ({{ result.cost_breakdown.coverage_percentage }}%):</span>
+                    <span class="cost-value">- ${{ result.cost_breakdown.insurance_covered|floatformat:2 }}</span>
+                </div>
+                <div class="cost-row total" style="background: #10b981; color: white; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                    <span class="cost-label"><strong>You Pay:</strong></span>
+                    <span class="cost-value"><strong>${{ result.cost_breakdown.patient_pays|floatformat:2 }}</strong></span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Recommendations -->
+    <div class="result-card">
+        <div class="card-header-custom">
+            <div class="icon" style="background: #8b5cf6; color: white;">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <h3>Recommendations</h3>
+        </div>
+        
+        <ul class="recommendations-list">
+            {% for recommendation in result.recommendations %}
+            <li>{{ recommendation }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button onclick="window.print()" class="btn-action btn-secondary-action">
+            <i class="fas fa-print"></i>
+            Print Report
+        </button>
+        <a href="{% url 'ai_diagnosis' %}" class="btn-action btn-secondary-action" style="text-decoration: none;">
+            <i class="fas fa-redo"></i>
+            New Diagnosis
+        </a>
+        <a href="{% url 'appointment_create' %}" class="btn-action btn-primary-action" style="text-decoration: none;">
+            <i class="fas fa-calendar-plus"></i>
+            Book Appointment
+        </a>
+    </div>
+</div>
+{% endblock %}

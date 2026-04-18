@@ -1,0 +1,483 @@
+{% extends 'medicare/base.html' %}
+
+{% block title %}Dashboard - Medicare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: #9b9b9bff 0%;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px;
+        color: white;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .dashboard-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.75rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        border: none;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    }
+    
+    .stat-card .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+    }
+    
+    .stat-card h6 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.75rem;
+    }
+    
+    .stat-card h2 {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.75rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        height: 100%;
+    }
+    
+    .info-card h6 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .progress-item {
+        margin-bottom: 1.25rem;
+    }
+    
+    .progress-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .progress-item .label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .progress-item .label span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .progress {
+        height: 10px;
+        border-radius: 10px;
+        background: #f1f5f9;
+    }
+    
+    .progress-bar {
+        border-radius: 10px;
+    }
+    
+    .table-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+    }
+    
+    .table-card .card-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 2px solid #e2e8f0;
+        padding: 1.25rem 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 1rem;
+    }
+    
+    .table-card .table {
+        margin: 0;
+    }
+    
+    .table-card .table thead th {
+        background: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.5rem;
+    }
+    
+    .table-card .table tbody td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        color: #334155;
+        font-size: 0.9rem;
+    }
+    
+    .table-card .table tbody tr {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.2s ease;
+    }
+    
+    .table-card .table tbody tr:hover {
+        background: #f8fafc;
+    }
+    
+    .table-card .table tbody tr:last-child {
+        border-bottom: none;
+    }
+    
+    .badge {
+        padding: 0.35rem 0.75rem;
+        font-weight: 600;
+        font-size: 0.75rem;
+        border-radius: 6px;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 180px;
+        margin-top: 1rem;
+    }
+    
+    .revenue-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .revenue-item {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 1rem;
+        border-radius: 12px;
+        border-left: 4px solid;
+    }
+    
+    .revenue-item.paid {
+        border-left-color: #10b981;
+    }
+    
+    .revenue-item.pending {
+        border-left-color: #f59e0b;
+    }
+    
+    .revenue-item .label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .revenue-item .amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    
+    .section-spacing {
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1><i class="fas fa-chart-line me-3"></i>Dashboard Overview</h1>
+            <p>Welcome back, {{ user.username }}! Here's what's happening today.</p>
+        </div>
+        <div style="font-size: 0.9rem;">
+            <i class="fas fa-calendar-day me-2"></i>{{ request.user.date_joined|date:"F d, Y" }}
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 section-spacing">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="text-muted">Total Patients</h6>
+                    <h2 class="text-primary">{{ total_patients }}</h2>
+                </div>
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="text-muted">Total Doctors</h6>
+                    <h2 class="text-success">{{ total_doctors }}</h2>
+                </div>
+                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                    <i class="fas fa-user-md"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="text-muted">Appointments</h6>
+                    <h2 class="text-warning">{{ total_appointments }}</h2>
+                </div>
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="text-muted">Total Revenue</h6>
+                    <h2 class="text-info">${{ total_revenue|floatformat:0 }}</h2>
+                </div>
+                <div class="stat-icon bg-info bg-opacity-10 text-info">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Insights Section -->
+<div class="row g-4 section-spacing">
+    <div class="col-lg-4">
+        <div class="info-card">
+            <h6><i class="fas fa-calendar-check text-primary"></i> Appointment Status</h6>
+            <div class="progress-item">
+                <div class="label">
+                    <span><i class="fas fa-clock text-success"></i> Scheduled</span>
+                    <strong>{{ scheduled_appointments }}</strong>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar bg-success" style="width: {% widthratio scheduled_appointments total_appointments 100 %}%"></div>
+                </div>
+            </div>
+            <div class="progress-item">
+                <div class="label">
+                    <span><i class="fas fa-check-double text-primary"></i> Completed</span>
+                    <strong>{{ completed_appointments }}</strong>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar bg-primary" style="width: {% widthratio completed_appointments total_appointments 100 %}%"></div>
+                </div>
+            </div>
+            <div class="progress-item">
+                <div class="label">
+                    <span><i class="fas fa-times-circle text-danger"></i> Cancelled</span>
+                    <strong>{{ cancelled_appointments }}</strong>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar bg-danger" style="width: {% widthratio cancelled_appointments total_appointments 100 %}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="info-card">
+            <h6><i class="fas fa-dollar-sign text-success"></i> Revenue Status</h6>
+            <div class="revenue-summary">
+                <div class="revenue-item paid">
+                    <div class="label">
+                        <i class="fas fa-check-circle text-success"></i> Paid
+                    </div>
+                    <div class="amount text-success">${{ paid_revenue|floatformat:0 }}</div>
+                </div>
+                <div class="revenue-item pending">
+                    <div class="label">
+                        <i class="fas fa-clock text-warning"></i> Pending
+                    </div>
+                    <div class="amount text-warning">${{ pending_revenue|floatformat:0 }}</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="info-card">
+            <h6><i class="fas fa-star text-warning"></i> Top Treatments</h6>
+            {% for treatment in treatment_type_data %}
+            <div class="progress-item">
+                <div class="label">
+                    <span>{{ treatment.treatment_type }}</span>
+                    <strong>{{ treatment.count }}</strong>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar bg-primary" style="width: {% widthratio treatment.count treatment_type_data.0.count 100 %}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent & Upcoming Appointments -->
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="table-card">
+            <div class="card-header">
+                <i class="fas fa-history me-2"></i>Recent Appointments
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apt in recent_appointments %}
+                        <tr>
+                            <td><strong>{{ apt.patient.full_name }}</strong></td>
+                            <td>{{ apt.doctor.full_name }}</td>
+                            <td>{{ apt.appointment_date|date:"M d, Y" }}</td>
+                            <td>
+                                <span class="badge bg-{% if apt.status == 'Completed' %}success{% elif apt.status == 'Scheduled' %}primary{% elif apt.status == 'Cancelled' %}danger{% else %}secondary{% endif %}">
+                                    {{ apt.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted" style="padding: 2rem;">
+                                <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                No recent appointments
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="table-card">
+            <div class="card-header">
+                <i class="fas fa-calendar-day me-2"></i>Upcoming Appointments
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apt in upcoming_appointments %}
+                        <tr>
+                            <td><strong>{{ apt.patient.full_name }}</strong></td>
+                            <td>{{ apt.doctor.full_name }}</td>
+                            <td>{{ apt.appointment_date|date:"M d, Y" }}</td>
+                            <td><span class="badge bg-info">{{ apt.appointment_time|time:"h:i A" }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted" style="padding: 2rem;">
+                                <i class="fas fa-calendar-times fa-2x mb-2 d-block"></i>
+                                No upcoming appointments
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Revenue Chart
+const ctx = document.getElementById('revenueChart');
+if (ctx) {
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Paid', 'Pending'],
+            datasets: [{
+                data: [{{ paid_revenue }}, {{ pending_revenue }}],
+                backgroundColor: ['#10b981', '#f59e0b'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

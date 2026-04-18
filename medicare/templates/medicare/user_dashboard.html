@@ -1,0 +1,491 @@
+{% extends 'medicare/base.html' %}
+
+{% block title %}My Dashboard - Medicare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .user-dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    }
+    
+    .user-dashboard-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .user-dashboard-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .quick-action-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+        height: 100%;
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        border-color: #667eea;
+    }
+    
+    .quick-action-card .icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .quick-action-card h5 {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .quick-action-card p {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.75rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        height: 100%;
+    }
+    
+    .info-card h6 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .doctor-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .doctor-card .avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 1rem;
+        border: 4px solid white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .doctor-card h5 {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+    
+    .doctor-card .specialization {
+        color: #667eea;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .appointment-item {
+        background: #f8fafc;
+        border-left: 4px solid #667eea;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .appointment-item:hover {
+        background: #f1f5f9;
+        transform: translateX(5px);
+    }
+    
+    .appointment-item .date {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .appointment-item .doctor {
+        color: #1e293b;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .appointment-item .time {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+    
+    .billing-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid;
+    }
+    
+    .billing-item.paid {
+        border-left-color: #10b981;
+    }
+    
+    .billing-item.pending {
+        border-left-color: #f59e0b;
+    }
+    
+    .billing-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .billing-summary-item {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 1.25rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+    
+    .billing-summary-item .label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .billing-summary-item .amount {
+        font-size: 1.75rem;
+        font-weight: 700;
+    }
+    
+    .billing-summary-item.paid .amount {
+        color: #10b981;
+    }
+    
+    .billing-summary-item.pending .amount {
+        color: #f59e0b;
+    }
+    
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 16px 16px 0 0;
+        padding: 1.5rem;
+    }
+    
+    .modal-header h5 {
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .modal-body {
+        padding: 2rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-book {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-book:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #94a3b8;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="user-dashboard-header">
+    <h1><i class="fas fa-user-circle me-3"></i>Welcome, {{ user.username|title }}!</h1>
+    <p>Manage your health, appointments, and medical records all in one place.</p>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <a href="{% url 'ai_diagnosis' %}" style="text-decoration: none;">
+            <div class="quick-action-card">
+                <div class="icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h5>AI Diagnosis</h5>
+                <p>Get instant diagnosis based on your symptoms</p>
+            </div>
+        </a>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="quick-action-card" data-bs-toggle="modal" data-bs-target="#bookAppointmentModal">
+            <div class="icon">
+                <i class="fas fa-calendar-plus"></i>
+            </div>
+            <h5>Book Appointment</h5>
+            <p>Schedule a visit with your doctor</p>
+        </div>
+    </div>
+    
+    {% comment %} <div class="col-lg-3 col-md-6">
+        <a href="{% url 'appointment_list' %}" style="text-decoration: none;">
+            <div class="quick-action-card">
+                <div class="icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h5>My Appointments</h5>
+                <p>View all your scheduled appointments</p>
+            </div>
+        </a>
+    </div> {% endcomment %}
+    
+    {% comment %} <div class="col-lg-3 col-md-6">
+        <a href="{% url 'billing_list' %}" style="text-decoration: none;">
+            <div class="quick-action-card">
+                <div class="icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <h5>My Bills</h5>
+                <p>Check your billing and payment status</p>
+            </div>
+        </a>
+    </div> {% endcomment %}
+</div>
+
+<div class="row g-4">
+    <!-- Assigned Doctor -->
+    <div class="col-lg-4">
+        <div class="info-card">
+            <h6><i class="fas fa-user-md text-success"></i> My Doctor</h6>
+            {% if assigned_doctor %}
+            <div class="doctor-card">
+                <div class="avatar">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <h5>Dr. {{ assigned_doctor.full_name }}</h5>
+                <p class="specialization">{{ assigned_doctor.specialization }}</p>
+                <hr>
+                <div style="text-align: left; font-size: 0.85rem; color: #64748b;">
+                    <p style="margin-bottom: 0.5rem;"><i class="fas fa-envelope me-2"></i>{{ assigned_doctor.email }}</p>
+                    <p style="margin: 0;"><i class="fas fa-phone me-2"></i>{{ assigned_doctor.contact_number }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-user-md"></i>
+                <p>No doctor assigned yet.<br>Book an appointment to get started!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Upcoming Appointments -->
+    <div class="col-lg-4">
+        <div class="info-card">
+            <h6><i class="fas fa-calendar-day text-primary"></i> Upcoming Appointments</h6>
+            {% if upcoming_appointments %}
+                {% for apt in upcoming_appointments %}
+                <div class="appointment-item">
+                    <div class="date">
+                        <i class="fas fa-calendar me-2"></i>{{ apt.appointment_date|date:"M d, Y" }}
+                    </div>
+                    <div class="doctor">
+                        <i class="fas fa-user-md me-2"></i>Dr. {{ apt.doctor.full_name }}
+                    </div>
+                    <div class="time">
+                        <i class="fas fa-clock me-2"></i>{{ apt.appointment_time|time:"h:i A" }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <p>No upcoming appointments.<br>Schedule one now!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Billing Status -->
+    <div class="col-lg-4">
+        <div class="info-card">
+            <h6><i class="fas fa-dollar-sign text-warning"></i> Billing Status</h6>
+            {% if my_bills %}
+                {% for bill in my_bills %}
+                <div class="billing-item {% if bill.payment_status == 'Paid' %}paid{% else %}pending{% endif %}">
+                    <div>
+                        <div style="font-weight: 600; color: #1e293b;">{{ bill.bill_date|date:"M d, Y" }}</div>
+                        <div style="font-size: 0.85rem; color: #64748b;">{{ bill.treatment.treatment_type }}</div>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 1.1rem; color: #1e293b;">${{ bill.amount|floatformat:2 }}</div>
+                        <span class="badge bg-{% if bill.payment_status == 'Paid' %}success{% else %}warning{% endif %}">
+                            {{ bill.payment_status }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <div class="billing-summary">
+                    <div class="billing-summary-item paid">
+                        <div class="label">Paid</div>
+                        <div class="amount">${{ paid_bills|floatformat:0 }}</div>
+                    </div>
+                    <div class="billing-summary-item pending">
+                        <div class="label">Pending</div>
+                        <div class="amount">${{ pending_bills|floatformat:0 }}</div>
+                    </div>
+                </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-file-invoice"></i>
+                <p>No billing records yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Book Appointment Modal -->
+<div class="modal fade" id="bookAppointmentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5><i class="fas fa-calendar-plus me-2"></i>Book New Appointment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                {% if patient %}
+                <form method="POST" action="{% url 'user_book_appointment' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="patient_id" value="{{ patient.patient_id }}">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Select Doctor <span class="text-danger">*</span></label>
+                        <select name="doctor_id" class="form-select" required>
+                            <option value="">Choose a doctor...</option>
+                            {% for doctor in available_doctors %}
+                            <option value="{{ doctor.doctor_id }}">Dr. {{ doctor.full_name }} - {{ doctor.specialization }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Appointment Date <span class="text-danger">*</span></label>
+                        <input type="date" name="appointment_date" class="form-control" required min="{{ today|date:'Y-m-d' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Appointment Time <span class="text-danger">*</span></label>
+                        <input type="time" name="appointment_time" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Reason for Visit</label>
+                        <textarea name="reason" class="form-control" rows="3" placeholder="Describe your symptoms or reason for visit..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn-book w-100">
+                        <i class="fas fa-check me-2"></i>Book Appointment
+                    </button>
+                </form>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Patient Record Not Found!</strong><br>
+                    Please contact the administrator to create your patient profile.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Set minimum date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.querySelector('input[name="appointment_date"]');
+    if (dateInput) {
+        dateInput.setAttribute('min', today);
+    }
+});
+</script>
+{% endblock %}

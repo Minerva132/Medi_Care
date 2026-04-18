@@ -1,0 +1,31 @@
+{%extends 'medicare/base.html'%}
+
+{%block title%}Appointment Details - Medicare{%endblock%}
+
+{%block content%}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 fw-bold"><i class="fas fa-calendar-check text-primary"></i> Appointment Details</h1>
+    <div>
+        <a href="{%url 'appointment_update' appointment.appointment_id%}" class="btn btn-warning">
+            <i class="fas fa-edit me-2"></i>Edit
+        </a>
+        <a href="{%url 'appointment_list'%}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Information</div>
+    <div class="card-body">
+        <table class="table table-borderless">
+            {%for field in appointment._meta.fields%}
+            <tr>
+                <th>{{field.verbose_name|title}}:</th>
+                <td>{{field.value_to_string(appointment)}}</td>
+            </tr>
+            {%endfor%}
+        </table>
+    </div>
+</div>
+{%endblock%}
